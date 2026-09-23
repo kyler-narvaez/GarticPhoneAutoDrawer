@@ -16,6 +16,15 @@ def main():
                 break
             case 'b':
                 bf.DrawBoxBorder()
+            case 'i':
+                img_path = input("Enter image path (default: ./images/test_img.png): ").strip()
+                if not img_path:
+                    img_path = "./images/test_img.png"
+                threshold_input = input("Enter threshold (default: 0.5): ").strip()
+                threshold = float(threshold_input) if threshold_input else 0.5
+                step_count_input = input("Enter step count (default: 5): ").strip()
+                step_count = int(step_count_input) if step_count_input else 5
+                bf.DrawImage(img_path=img_path, threshold=threshold, step_count=step_count)
             case _:
                 bf.StartDrawing()
         

@@ -1,5 +1,6 @@
 from PIL import Image
 import numpy as np
+import cv2
 
 def load_image(path):
     img = Image.open(path)
@@ -44,11 +45,10 @@ def create_mask(img, threshold=0.5):
     mask = img < threshold #draw darker pixels
     return mask
 
-
 def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_count=5):
     img = load_image(img_path)
     
-    _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_width, canvas_height)
+    _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_height, canvas_width)
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
@@ -62,10 +62,27 @@ def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_c
 
     return points
     
+def get_contours(img_gray, canny_low=50, canny_high=150):
+    # Convert boolean mask to uint8
+    gray_uint8 = (img_gray * 255).astype(np.uint8)
+
+    edges = cv2.Canny(gray_uint8, canny_low, canny_high)
+    # Find contours using OpenCV
+    contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    return contours
+
+def simplify_contours(contours, epsilon_factor=0.01):
+    simplified_contours = []
+    for contour in contours:
+        epsilon = epsilon_factor * cv2.arcLength(contour, closed=False)
+        simplified = cv2.approxPolyDP(contour, epsilon, closed=False)
+        simplified_contours.append(simplified.reshape(-1, 2))  # Reshape to (N, 2) for easier handling
+    return simplified_contours
 
 if __name__ == "__main__":
     # Example usage
-    points =get_draw_points("./images/test_img.png", 800, 600, threshold=0.5, step_count=12)
+    points = get_draw_points("./images/test_img.png", 800, 600, threshold=0.5, step_count=12)
 
     print(f"Number of points to draw: {len(points)}")
     print(points)

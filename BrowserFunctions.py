@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from ImageCalculations import get_draw_points
 
 class BrowserFunctions:
     def __init__(self):
@@ -51,3 +52,16 @@ class BrowserFunctions:
         self.MoveMouseOnCanvas(0, self.maxHeight)
         self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.up()
+
+    def DrawImage(self, img_path="./images/test_img.png", threshold=0.5, step_count=5):
+        self.FindCanvas()
+        points = get_draw_points(img_path, self.maxWidth, self.maxHeight, threshold=threshold, step_count=step_count)
+
+        if not points:
+            print("No points to draw — check your image and threshold.")
+            return
+
+        for (x, y) in points:
+            self.MoveMouseOnCanvas(x, y)
+            self.page.mouse.down()
+            self.page.mouse.up()
