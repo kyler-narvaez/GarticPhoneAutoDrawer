@@ -34,11 +34,11 @@ class BrowserFunctions:
 
     def EraseDrawing(self):
         self.FindCanvas()
-        for row in range(self.maxHeight, 20):
+        for row in range(0, int(self.maxHeight), 20):
             self.MoveMouseOnCanvas(0, row)
             self.page.mouse.down()
             self.MoveMouseOnCanvas(self.maxWidth, row)
-        self.page.mouse.up()
+            self.page.mouse.up()
 
     def DrawBoxBorder(self):
         self.FindCanvas()
