@@ -5,6 +5,9 @@ class BrowserFunctions:
         self.playwright_instance = sync_playwright().start()
         self.browser = None
         self.page = None
+        self.box = None
+        self.maxHeight = 0
+        self.maxWidth = 0
 
     def OpenBrowser(self):
         self.browser = self.playwright_instance.chromium.launch(headless=False)
@@ -14,20 +17,37 @@ class BrowserFunctions:
         self.browser.close()
         self.playwright_instance.stop()
 
-    def StartDrawing(self):
-        #get canvas to paint
-        box = self.page.locator('[class*="drawingContainer"] canvas').last.bounding_box(timeout=5000)
-        if box is None:
+    def FindCanvas(self):
+        self.box = self.page.locator('[class*="drawingContainer"] canvas').last.bounding_box(timeout=5000)
+        if self.box is None:
             print("No canvas found — are you on the drawing screen?")
             return
-        
-        print(box)
-    
-        self.page.mouse.move(box["x"]+3, box["y"]+3)
+
+        self.maxHeight = self.box["height"]
+        self.maxWidth = self.box["width"]
+
+        print(self.box)
+
+    def MoveMouseOnCanvas(self, x, y, steps=20):
+        self.page.mouse.move(self.box["x"] + x, self.box["y"] + y, steps=steps)
+
+    def StartDrawing(self):
+        self.FindCanvas()
+        self.MoveMouseOnCanvas(1, 1)
         self.page.mouse.down()
         self.page.mouse.up()
 
-        self.page.mouse.move(box["x"]+box["width"]//2, box["y"]+box["height"]//2)
+        self.MoveMouseOnCanvas(self.maxWidth//2, self.maxHeight//2)
         self.page.mouse.down()
-        self.page.mouse.move(box["x"]+box["width"]//2 + 30, box["y"]+box["height"]//2+50)
+        self.MoveMouseOnCanvas(self.maxWidth//2 + 30, self.maxHeight//2 + 50)
+        self.page.mouse.up()
+
+    def DrawBoxBorder(self):
+        self.FindCanvas()
+        self.MoveMouseOnCanvas(1, 1)
+        self.page.mouse.down()
+        self.MoveMouseOnCanvas(self.maxWidth, 0)
+        self.MoveMouseOnCanvas(self.maxWidth, self.maxHeight)
+        self.MoveMouseOnCanvas(0, self.maxHeight)
+        self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.up()
