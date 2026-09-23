@@ -33,7 +33,7 @@ class BrowserFunctions:
 
     def StartDrawing(self):
         self.FindCanvas()
-        self.MoveMouseOnCanvas(1, 1)
+        self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.down()
         self.page.mouse.up()
 
@@ -44,7 +44,7 @@ class BrowserFunctions:
 
     def DrawBoxBorder(self):
         self.FindCanvas()
-        self.MoveMouseOnCanvas(1, 1)
+        self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.down()
         self.MoveMouseOnCanvas(self.maxWidth, 0)
         self.MoveMouseOnCanvas(self.maxWidth, self.maxHeight)
