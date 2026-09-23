@@ -3,7 +3,11 @@ import numpy as np
 import cv2
 
 def load_image(path):
-    img = Image.open(path)
+    try:
+        img = Image.open(path)
+    except FileNotFoundError:
+        print(f"Error: The file at '{path}' does not exist.")
+        return
 
     #convert to RGB if not already
     if img.mode != 'RGB':
@@ -47,6 +51,8 @@ def create_mask(img, threshold=0.5):
 
 def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_count=5):
     img = load_image(img_path)
+
+    if img is None: return
     
     _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_height, canvas_width)
     img_resized = resize_image(img, new_width, new_height)
@@ -72,13 +78,38 @@ def get_contours(img_gray, canny_low=50, canny_high=150):
 
     return contours
 
-def simplify_contours(contours, epsilon_factor=0.01):
+def simplify_contours(contours, epsilon_factor=0.01, min_length=15):
     simplified_contours = []
     for contour in contours:
+        length = cv2.arcLength(contour, closed=False)
+        if length < min_length:
+            continue  # skip noise fragments
         epsilon = epsilon_factor * cv2.arcLength(contour, closed=False)
         simplified = cv2.approxPolyDP(contour, epsilon, closed=False)
         simplified_contours.append(simplified.reshape(-1, 2))  # Reshape to (N, 2) for easier handling
     return simplified_contours
+
+def get_draw_strokes(img_path, canvas_width, canvas_height, canny_low=50, canny_high=150, epsilon_factor=0.01, min_length=15):
+    img = load_image(img_path)
+
+    if img is None: return
+    
+    _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_height, canvas_width)
+    img_resized = resize_image(img, new_width, new_height)
+
+    gray_img = convert_to_grayscale(img_resized)
+    gray_uint8 = (gray_img * 255).astype(np.uint8)
+
+    contours = get_contours(gray_uint8, canny_low=canny_low, canny_high=canny_high)
+    simplified_contours = simplify_contours(contours, epsilon_factor=epsilon_factor, min_length=min_length)
+
+    # Offset the contours to fit within the canvas
+    offset_contours = []
+    for contour in simplified_contours:
+        offset_contour = [(x + x_offset, y + y_offset) for (x, y) in contour]
+        offset_contours.append(offset_contour)
+
+    return offset_contours
 
 if __name__ == "__main__":
     # Example usage
