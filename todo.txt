@@ -1,0 +1,4 @@
+Erase changes size of pen and turns to eraser
+Grab pixel color and change color on canvas
+Fast way to pick images
+Fast way to add new images
