@@ -1,4 +1,5 @@
 import BrowserFunctions
+import os
 
 def main():
 
@@ -14,6 +15,8 @@ def main():
         "\n's' - Strokes"
         "\n'e' - Erase"
         "\n'q' - Quit\nPress enter to draw a line\nEnter command: ")
+
+        image_picker()
 
         match cmd.strip().lower():
             case 'q':
@@ -56,6 +59,12 @@ def get_float_input(name, default_val=1.0):
 def get_int_input(name, default_val=1):
     user_input = input(f'Enter {name} (default: {default_val}): ').strip()
     return int(user_input) if user_input else default_val
+
+def image_picker():
+    image_paths = os.listdir('./images/')
+    print("List of current paths:")
+    for images in image_paths:
+        print('\t' + images)
 
 if __name__ == "__main__":
     main()
