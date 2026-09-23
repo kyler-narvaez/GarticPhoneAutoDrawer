@@ -32,15 +32,12 @@ class BrowserFunctions:
     def MoveMouseOnCanvas(self, x, y, steps=1):
         self.page.mouse.move(self.box["x"] + x, self.box["y"] + y, steps=steps)
 
-    def StartDrawing(self):
+    def EraseDrawing(self):
         self.FindCanvas()
-        self.MoveMouseOnCanvas(0, 0)
-        self.page.mouse.down()
-        self.page.mouse.up()
-
-        self.MoveMouseOnCanvas(self.maxWidth//2, self.maxHeight//2)
-        self.page.mouse.down()
-        self.MoveMouseOnCanvas(self.maxWidth//2 + 30, self.maxHeight//2 + 50)
+        for row in range(self.maxHeight, 20):
+            self.MoveMouseOnCanvas(0, row)
+            self.page.mouse.down()
+            self.MoveMouseOnCanvas(self.maxWidth, row)
         self.page.mouse.up()
 
     def DrawBoxBorder(self):
@@ -77,9 +74,9 @@ class BrowserFunctions:
             self.MoveMouseOnCanvas(x1, y1, steps=segment_steps)
         self.page.mouse.up()
 
-    def DrawImageContours(self, img_path="./images/test_img.png", canny_low=50, canny_high=150, epsilon_factor=0.01, segment_steps=3, min_length=15):
+    def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, mask_thresh=0.5, min_length=15):
         self.FindCanvas()
-        strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, canny_low=canny_low, canny_high=canny_high, epsilon_factor=epsilon_factor)
+        strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, epsilon_factor=epsilon_factor, mask_thresh=mask_thresh, min_length=min_length)
 
         if not strokes:
             print("No strokes to draw — check your image and threshold.")

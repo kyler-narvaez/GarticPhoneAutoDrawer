@@ -9,7 +9,11 @@ def main():
     bf.page.goto("https://garticphone.com")
 
     while True:
-        cmd = input("Commands:\n'b' - Draw box border\n'q' - Quit\nPress enter to draw a line\nEnter command: ")
+        cmd = input("Commands:\n'b' - Draw box border"
+        "\n'd' - Dots"
+        "\n's' - Strokes"
+        "\n'e' - Erase"
+        "\n'q' - Quit\nPress enter to draw a line\nEnter command: ")
 
         match cmd.strip().lower():
             case 'q':
@@ -23,14 +27,15 @@ def main():
                 bf.DrawImageDots(img_path=img_path, threshold=threshold, step_count=step_count)
             case 's':
                 img_path = get_img_path()
-                canny_low = get_int_input('canny_low', 50)
-                canny_high = get_int_input('canny_high', 150)
                 epsilon = get_float_input('epsilon_factor', 0.01)
                 segment_steps = get_int_input('segment_steps', 1)
+                mask_thresh = get_float_input('mask_thresh', 0.5)
                 min_length = get_int_input('min line length', 15)
-                bf.DrawImageContours(img_path=img_path,canny_low=canny_low, canny_high=canny_high,epsilon_factor=epsilon,segment_steps=segment_steps)
+                bf.DrawImageContours(img_path=img_path,epsilon_factor=epsilon,segment_steps=segment_steps,mask_thresh=mask_thresh,min_length=min_length)
+            case 'e':
+                bf.EraseDrawing()
             case _:
-                bf.StartDrawing()
+                pass
         
         print("Done drawing.")
         

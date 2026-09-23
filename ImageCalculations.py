@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import cv2
+from skimage.morphology import skeletonize
 
 def load_image(path):
     try:
@@ -68,13 +69,11 @@ def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_c
 
     return points
     
-def get_contours(img_gray, canny_low=50, canny_high=150):
+def get_contours(skeleton):
     # Convert boolean mask to uint8
-    gray_uint8 = (img_gray * 255).astype(np.uint8)
-
-    edges = cv2.Canny(gray_uint8, canny_low, canny_high)
+    skeleton = (skeleton * 255).astype(np.uint8)
     # Find contours using OpenCV
-    contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(skeleton, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     return contours
 
@@ -89,7 +88,8 @@ def simplify_contours(contours, epsilon_factor=0.01, min_length=15):
         simplified_contours.append(simplified.reshape(-1, 2))  # Reshape to (N, 2) for easier handling
     return simplified_contours
 
-def get_draw_strokes(img_path, canvas_width, canvas_height, canny_low=50, canny_high=150, epsilon_factor=0.01, min_length=15):
+
+def get_draw_strokes(img_path, canvas_width, canvas_height, epsilon_factor=0.01, mask_thresh=0.5, min_length=15):
     img = load_image(img_path)
 
     if img is None: return
@@ -98,9 +98,10 @@ def get_draw_strokes(img_path, canvas_width, canvas_height, canny_low=50, canny_
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
-    gray_uint8 = (gray_img * 255).astype(np.uint8)
+    mask = create_mask(gray_img, threshold=mask_thresh)
+    skeleton = skeletonize(mask)
 
-    contours = get_contours(gray_uint8, canny_low=canny_low, canny_high=canny_high)
+    contours = get_contours(skeleton=skeleton)
     simplified_contours = simplify_contours(contours, epsilon_factor=epsilon_factor, min_length=min_length)
 
     # Offset the contours to fit within the canvas
