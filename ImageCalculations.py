@@ -60,7 +60,7 @@ def create_mask(img, threshold=0.5):
     mask = img < threshold #draw darker pixels
     return mask
 
-def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_count=5):
+def get_draw_points(img_path, canvas_width, canvas_height, step_count=5):
     img = load_image(img_path)
 
     if img is None: return
@@ -68,14 +68,15 @@ def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5, step_c
     _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_height, canvas_width)
     img_resized = resize_image(img, new_width, new_height)
 
-    gray_img = convert_to_grayscale(img_resized)
-    mask = create_mask(gray_img, threshold=threshold)
+    # gray_img = convert_to_grayscale(img_resized)
+    # mask = create_mask(gray_img, threshold=threshold)
 
     points = []
-    for y in range(0, mask.shape[0], step_count):
-        for x in range(0, mask.shape[1], step_count):
-            if mask[y, x]:
-                points.append((x + x_offset, y + y_offset))
+    for y in range(0, new_height, step_count):
+        for x in range(0, new_width, step_count):
+            r, g, b = img_resized[y, x]
+            points.append((x + x_offset, y + y_offset, (int(r), int(g), int(b))))
+                
 
     return points
     

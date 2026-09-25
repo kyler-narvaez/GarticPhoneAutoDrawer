@@ -25,10 +25,9 @@ def main():
                 bf.DrawBoxBorder()
             case 'd':
                 img_path = get_img_path()
-                threshold = get_float_input('threshold', 0.5)
                 step_count = get_int_input('step count', 5)
                 pen_size = get_int_input('pen_size', 1)
-                bf.DrawImageDots(img_path=img_path, threshold=threshold, step_count=step_count, pen_size=pen_size)
+                bf.DrawImageDots(img_path=img_path, step_count=step_count, pen_size=pen_size)
             case 's':
                 img_path = get_img_path()
                 epsilon = get_float_input('epsilon_factor', 0.01)
