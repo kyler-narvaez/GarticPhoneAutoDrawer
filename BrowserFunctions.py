@@ -1,4 +1,5 @@
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 from ImageCalculations import get_draw_points, get_draw_strokes
 
 class BrowserFunctions:
@@ -20,13 +21,20 @@ class BrowserFunctions:
         self.playwright_instance.stop()
 
     def FindCanvas(self):
-        self.box = self.page.locator('[class*="drawingContainer"] canvas').last.bounding_box(timeout=5000)
+        try:
+            self.box = self.page.locator('[class*="drawingContainer"] canvas').last.bounding_box(timeout=10000)
+        except PlaywrightTimeoutError:
+            print("Canvas not found — are you on the drawing screen?")
+            self.box = None
+            return False
+        
         if self.box is None:
-            print("No canvas found — are you on the drawing screen?")
-            return
-
-        self.maxHeight = self.box["height"]
+            print("Canvas locator resolved but returned no box — is it visible?")
+            return False
+        
         self.maxWidth = self.box["width"]
+        self.maxHeight = self.box["height"]
+        return True
 
     def FindPenSizes(self):
         self.penSizes = self.page.locator('button[class*="thickness"]').all()
@@ -47,7 +55,8 @@ class BrowserFunctions:
         self.page.mouse.move(self.box["x"] + x, self.box["y"] + y, steps=steps)
 
     def EraseDrawing(self):
-        self.FindCanvas()
+        if not self.FindCanvas():
+            return
         self.SetPenSize(4)
         self.SetEraser()
         for row in range(0, int(self.maxHeight), 20):
@@ -57,7 +66,8 @@ class BrowserFunctions:
             self.page.mouse.up()
 
     def DrawBoxBorder(self):
-        self.FindCanvas()
+        if not self.FindCanvas():
+            return
         self.SetPen()
         self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.down()
@@ -68,7 +78,8 @@ class BrowserFunctions:
         self.page.mouse.up()
 
     def DrawImageDots(self, img_path="./images/test_img.png", threshold=0.5, step_count=5, pen_size=2):
-        self.FindCanvas()
+        if not self.FindCanvas():
+            return
         self.SetPenSize(pen_size)
         self.SetPen()
         points = get_draw_points(img_path, self.maxWidth, self.maxHeight, threshold=threshold, step_count=step_count)
@@ -94,7 +105,8 @@ class BrowserFunctions:
         self.page.mouse.up()
 
     def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, mask_thresh=0.5, min_length=15, pen_size=2):
-        self.FindCanvas()
+        if not self.FindCanvas():
+            return
         self.SetPenSize(pen_size)
         self.SetPen()
         strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, epsilon_factor=epsilon_factor, mask_thresh=mask_thresh, min_length=min_length)

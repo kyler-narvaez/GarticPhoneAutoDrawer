@@ -27,15 +27,15 @@ def main():
                 img_path = get_img_path()
                 threshold = get_float_input('threshold', 0.5)
                 step_count = get_int_input('step count', 5)
-                pen_size = get_int_input('pen_size', 2)
+                pen_size = get_int_input('pen_size', 1)
                 bf.DrawImageDots(img_path=img_path, threshold=threshold, step_count=step_count, pen_size=pen_size)
             case 's':
                 img_path = get_img_path()
                 epsilon = get_float_input('epsilon_factor', 0.01)
                 segment_steps = get_int_input('segment_steps', 1)
                 mask_thresh = get_float_input('mask_thresh', 0.5)
-                min_length = get_int_input('min line length', 15)
-                pen_size = get_int_input('pen_size', 2)
+                min_length = get_int_input('min line length', 10)
+                pen_size = get_int_input('pen_size', 1)
                 bf.DrawImageContours(img_path=img_path,epsilon_factor=epsilon,
                                      segment_steps=segment_steps,mask_thresh=mask_thresh,
                                      min_length=min_length,pen_size=pen_size)
@@ -68,7 +68,7 @@ def image_picker():
     image_paths = os.listdir('./images/')
     print("List of current paths:")
     for images in image_paths:
-        print('\t' + images)
+        print('\t./images/' + images)
 
 if __name__ == "__main__":
     main()

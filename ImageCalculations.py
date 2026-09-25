@@ -38,8 +38,18 @@ def resize_image(img_arr, new_width, new_height):
     return np.array(img_resized)
 
 def save_image(img_arr, path):
+    if img_arr.dtype != np.uint8:
+        img_arr = (np.clip(img_arr, 0, 1) * 255).astype(np.uint8)
     img = Image.fromarray(img_arr)
     img.save(path)
+
+def save_contours_as_image(contours, width, height, path, thickness=1):
+    canvas = np.ones((height, width), dtype=np.uint8) * 255  # white background
+    for contour in contours:
+        pts = contour.reshape(-1, 1, 2).astype(np.int32)
+        cv2.polylines(canvas, [pts], isClosed=False, color=0, thickness=thickness)
+    save_image(canvas, path)
+
 
 def convert_to_grayscale(img_arr):
     # convert to grayscale
@@ -98,11 +108,15 @@ def get_draw_strokes(img_path, canvas_width, canvas_height, epsilon_factor=0.01,
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
+    save_image(gray_img, './images/gray.png')
     mask = create_mask(gray_img, threshold=mask_thresh)
+    save_image(mask, './images/mask.png')
     skeleton = skeletonize(mask)
+    save_image(skeleton, './images/skeleton.png')
 
     contours = get_contours(skeleton=skeleton)
     simplified_contours = simplify_contours(contours, epsilon_factor=epsilon_factor, min_length=min_length)
+    save_contours_as_image(simplified_contours, new_width, new_height, './images/simp_conts.png')
 
     # Offset the contours to fit within the canvas
     offset_contours = []
