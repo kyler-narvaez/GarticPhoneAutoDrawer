@@ -9,6 +9,7 @@ class BrowserFunctions:
         self.box = None
         self.maxHeight = 0
         self.maxWidth = 0
+        self.penSizes = []
 
     def OpenBrowser(self):
         self.browser = self.playwright_instance.chromium.launch(headless=False)
@@ -27,13 +28,28 @@ class BrowserFunctions:
         self.maxHeight = self.box["height"]
         self.maxWidth = self.box["width"]
 
-        print(self.box)
+    def FindPenSizes(self):
+        self.penSizes = self.page.locator('button[class*="thickness"]').all()
+
+    def SetPenSize(self, size):
+        self.FindPenSizes()
+        if (size < 0): size = 0
+        elif (size > 4): size = 4
+        self.penSizes[size].click()
+
+    def SetPen(self):
+        self.page.locator('button[class*="tool pen"]').click()
+
+    def SetEraser(self):
+        self.page.locator('button[class*="tool ers"]').click()
 
     def MoveMouseOnCanvas(self, x, y, steps=1):
         self.page.mouse.move(self.box["x"] + x, self.box["y"] + y, steps=steps)
 
     def EraseDrawing(self):
         self.FindCanvas()
+        self.SetPenSize(4)
+        self.SetEraser()
         for row in range(0, int(self.maxHeight), 20):
             self.MoveMouseOnCanvas(0, row)
             self.page.mouse.down()
@@ -42,6 +58,7 @@ class BrowserFunctions:
 
     def DrawBoxBorder(self):
         self.FindCanvas()
+        self.SetPen()
         self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.down()
         self.MoveMouseOnCanvas(self.maxWidth, 0)
@@ -50,8 +67,10 @@ class BrowserFunctions:
         self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.up()
 
-    def DrawImageDots(self, img_path="./images/test_img.png", threshold=0.5, step_count=5):
+    def DrawImageDots(self, img_path="./images/test_img.png", threshold=0.5, step_count=5, pen_size=2):
         self.FindCanvas()
+        self.SetPenSize(pen_size)
+        self.SetPen()
         points = get_draw_points(img_path, self.maxWidth, self.maxHeight, threshold=threshold, step_count=step_count)
 
         if not points:
@@ -74,8 +93,10 @@ class BrowserFunctions:
             self.MoveMouseOnCanvas(x1, y1, steps=segment_steps)
         self.page.mouse.up()
 
-    def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, mask_thresh=0.5, min_length=15):
+    def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, mask_thresh=0.5, min_length=15, pen_size=2):
         self.FindCanvas()
+        self.SetPenSize(pen_size)
+        self.SetPen()
         strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, epsilon_factor=epsilon_factor, mask_thresh=mask_thresh, min_length=min_length)
 
         if not strokes:
