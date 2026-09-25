@@ -124,6 +124,8 @@ class BrowserFunctions:
             return
         self.SetPenSize(pen_size)
         self.SetPen()
+        self.FindColorInput()
+        self.SetColor((0,0,0)) #black
         strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, epsilon_factor=epsilon_factor, mask_thresh=mask_thresh, min_length=min_length)
 
         if not strokes:

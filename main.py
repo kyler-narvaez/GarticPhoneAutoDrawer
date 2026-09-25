@@ -12,7 +12,7 @@ def main():
     while True:
         cmd = input("Commands:\n'b' - Draw box border"
         "\n'd' - Dots"
-        "\n's' - Strokes"
+        "\n's' - Sketch"
         "\n'e' - Erase"
         "\n'q' - Quit\nPress enter to draw a line\nEnter command: ")
 
@@ -25,8 +25,8 @@ def main():
                 bf.DrawBoxBorder()
             case 'd':
                 img_path = get_img_path()
-                step_count = get_int_input('step count', 5)
-                pen_size = get_int_input('pen_size', 1)
+                step_count = get_int_input('step count', 10)
+                pen_size = get_int_input('pen_size', 2)
                 bf.DrawImageDots(img_path=img_path, step_count=step_count, pen_size=pen_size)
             case 's':
                 img_path = get_img_path()
