@@ -90,13 +90,13 @@ class BrowserFunctions:
         self.MoveMouseOnCanvas(0, 0)
         self.page.mouse.up()
 
-    def DrawImageDots(self, img_path="./images/test_img.png", step_count=5, pen_size=2):
+    def DrawImageDots(self, img_path="./images/test_img.png", threshold=0.5, step_count=5, pen_size=2):
         if not self.FindCanvas():
             return
         self.SetPenSize(pen_size)
         self.SetPen()
         self.FindColorInput()
-        points = get_draw_points(img_path, self.maxWidth, self.maxHeight, step_count=step_count)
+        points = get_draw_points(img_path, self.maxWidth, self.maxHeight, threshold=threshold, step_count=step_count)
 
         if not points:
             print("No points to draw — check your image and threshold.")

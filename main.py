@@ -1,6 +1,8 @@
 import BrowserFunctions
 import os
 
+IMG_DIR = './images/'
+
 def main():
 
     bf = BrowserFunctions.BrowserFunctions()
@@ -25,9 +27,10 @@ def main():
                 bf.DrawBoxBorder()
             case 'd':
                 img_path = get_img_path()
+                mask_thresh = get_float_input('Mask_Thresh', 0.5)
                 step_count = get_int_input('step count', 10)
-                pen_size = get_int_input('pen_size', 2)
-                bf.DrawImageDots(img_path=img_path, step_count=step_count, pen_size=pen_size)
+                pen_size = get_int_input('pen_size', 3)
+                bf.DrawImageDots(img_path=img_path, threshold=mask_thresh, step_count=step_count, pen_size=pen_size)
             case 's':
                 img_path = get_img_path()
                 epsilon = get_float_input('epsilon_factor', 0.01)
