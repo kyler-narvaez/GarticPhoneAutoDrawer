@@ -69,7 +69,9 @@ def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5,step_co
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
+    save_image(gray_img, './images/gray.png')
     mask = create_mask(gray_img, threshold=threshold)
+    save_image(mask, './images/mask.png')
 
     points = []
     for y in range(0, new_height, step_count):

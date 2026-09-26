@@ -18,21 +18,23 @@ def main():
         "\n'e' - Erase"
         "\n'q' - Quit\nPress enter to draw a line\nEnter command: ")
 
-        image_picker()
-
         match cmd.strip().lower():
             case 'q':
                 break
             case 'b':
                 bf.DrawBoxBorder()
             case 'd':
-                img_path = get_img_path()
-                mask_thresh = get_float_input('Mask_Thresh', 0.5)
+                files = print_images()
+                file_index = get_int_input('File Index', 0)
+                img_path = get_img_path(files, file_index)
+                mask_thresh = get_float_input('Mask_Thresh', 1.0)
                 step_count = get_int_input('step count', 10)
                 pen_size = get_int_input('pen_size', 3)
                 bf.DrawImageDots(img_path=img_path, threshold=mask_thresh, step_count=step_count, pen_size=pen_size)
             case 's':
-                img_path = get_img_path()
+                files = print_images()
+                file_index = get_int_input('File Index', 0)
+                img_path = get_img_path(files, file_index)
                 epsilon = get_float_input('epsilon_factor', 0.01)
                 segment_steps = get_int_input('segment_steps', 1)
                 mask_thresh = get_float_input('mask_thresh', 0.5)
@@ -50,13 +52,22 @@ def main():
         
     bf.CloseBrowser() #Done
 
+def list_images():
+    file_types = ('.png', '.jpg', '.jpeg', '.bmp', 'webp')
+    files = sorted(f for f in os.listdir(IMG_DIR) if f.lower().endswith(file_types))
+    return files
 
-def get_img_path():
-    img_path = input("Enter image path (default: ./images/test_img.png): ").strip()
-    if not img_path:
-        img_path = "./images/test_img.png"
+def print_images():
+    files = list_images()
+    for i, file in enumerate(files):
+        print(f'{i}: {file}')
+    return files
 
-    return img_path
+def get_img_path(files, file_index):
+    if (file_index < 0): file_index = 0
+    elif (file_index >= len(files)): file_index = len(files)-1
+
+    return IMG_DIR + files[file_index]
 
 def get_float_input(name, default_val=1.0):
     user_input = input(f'Enter {name} (default: {default_val}): ').strip()
@@ -66,11 +77,6 @@ def get_int_input(name, default_val=1):
     user_input = input(f'Enter {name} (default: {default_val}): ').strip()
     return int(user_input) if user_input else default_val
 
-def image_picker():
-    image_paths = os.listdir('./images/')
-    print("List of current paths:")
-    for images in image_paths:
-        print('\t./images/' + images)
 
 if __name__ == "__main__":
     main()
