@@ -69,9 +69,9 @@ def get_draw_points(img_path, canvas_width, canvas_height, threshold=0.5,step_co
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
-    save_image(gray_img, './images/gray.png')
+    save_image(gray_img, './gray.png')
     mask = create_mask(gray_img, threshold=threshold)
-    save_image(mask, './images/mask.png')
+    save_image(mask, './mask.png')
 
     points = []
     for y in range(0, new_height, step_count):
@@ -112,15 +112,15 @@ def get_draw_strokes(img_path, canvas_width, canvas_height, epsilon_factor=0.01,
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
-    save_image(gray_img, './images/gray.png')
+    save_image(gray_img, './gray.png')
     mask = create_mask(gray_img, threshold=mask_thresh)
-    save_image(mask, './images/mask.png')
+    save_image(mask, './mask.png')
     skeleton = skeletonize(mask)
-    save_image(skeleton, './images/skeleton.png')
+    save_image(skeleton, './skeleton.png')
 
     contours = get_contours(skeleton=skeleton)
     simplified_contours = simplify_contours(contours, epsilon_factor=epsilon_factor, min_length=min_length)
-    save_contours_as_image(simplified_contours, new_width, new_height, './images/simp_conts.png')
+    save_contours_as_image(simplified_contours, new_width, new_height, './simp_conts.png')
 
     # Offset the contours to fit within the canvas
     offset_contours = []

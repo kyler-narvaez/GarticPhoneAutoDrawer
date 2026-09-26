@@ -25,7 +25,7 @@ def main():
                 bf.DrawBoxBorder()
             case 'd':
                 files = print_images()
-                file_index = get_int_input('File Index', 0)
+                file_index = get_int_input('File Index', len(files)-1)
                 img_path = get_img_path(files, file_index)
                 mask_thresh = get_float_input('Mask_Thresh', 1.0)
                 step_count = get_int_input('step count', 10)
@@ -33,12 +33,12 @@ def main():
                 bf.DrawImageDots(img_path=img_path, threshold=mask_thresh, step_count=step_count, pen_size=pen_size)
             case 's':
                 files = print_images()
-                file_index = get_int_input('File Index', 0)
+                file_index = get_int_input('File Index', len(files)-1)
                 img_path = get_img_path(files, file_index)
-                epsilon = get_float_input('epsilon_factor', 0.01)
+                epsilon = get_float_input('epsilon_factor', 0.001)
                 segment_steps = get_int_input('segment_steps', 1)
                 mask_thresh = get_float_input('mask_thresh', 0.5)
-                min_length = get_int_input('min line length', 10)
+                min_length = get_int_input('min line length', 30)
                 pen_size = get_int_input('pen_size', 1)
                 bf.DrawImageContours(img_path=img_path,epsilon_factor=epsilon,
                                      segment_steps=segment_steps,mask_thresh=mask_thresh,
