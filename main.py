@@ -25,7 +25,7 @@ def main():
                 bf.DrawBoxBorder()
             case 'd':
                 files = print_images()
-                file_index = get_int_input('File Index', 0)
+                file_index = get_int_input('File Index', len(files)-1)
                 img_path = get_img_path(files, file_index)
                 mask_thresh = get_float_input('Mask_Thresh', 1.0)
                 step_count = get_int_input('step count', 10)
@@ -33,17 +33,17 @@ def main():
                 bf.DrawImageDots(img_path=img_path, threshold=mask_thresh, step_count=step_count, pen_size=pen_size)
             case 's':
                 files = print_images()
-                file_index = get_int_input('File Index', 0)
+                file_index = get_int_input('File Index', len(files)-1)
                 img_path = get_img_path(files, file_index)
                 epsilon = get_float_input('epsilon_factor', 0.001)
-                canny_low = get_int_input('canny_low', 300)
-                canny_high = get_int_input('canny_high', 600)
+                canny_low = get_int_input('canny_low', 100) #300
+                canny_high = get_int_input('canny_high', 200) #600
                 segment_steps = get_int_input('segment_steps', 1)
-                fill_ratio = get_float_input('fill_ratio', 0.5)
+                fill_ratio = get_float_input('fill_ratio', 0.5) #0.3
                 min_length = get_int_input('min_line length', 30)
-                pen_size = get_int_input('pen_size', 1)
+                pen_size = get_int_input('pen_size', 2)
                 bf.DrawImageContours(img_path=img_path,epsilon_factor=epsilon,
-                                     segment_steps=segment_steps,canny_low=canny_low,canny_high=canny_high, fill_area_ratio=fill_ratio,
+                                     segment_steps=segment_steps,canny_low=canny_low, canny_high=canny_high, fill_area_ratio=fill_ratio,
                                      min_length=min_length,pen_size=pen_size)
             case 'e':
                 bf.EraseDrawing()
