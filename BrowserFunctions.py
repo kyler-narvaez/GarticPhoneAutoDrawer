@@ -119,14 +119,14 @@ class BrowserFunctions:
             self.MoveMouseOnCanvas(x1, y1, steps=segment_steps)
         self.page.mouse.up()
 
-    def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, mask_thresh=0.5, min_length=15, pen_size=2):
+    def DrawImageContours(self, img_path="./images/test_img.png", epsilon_factor=0.01, segment_steps=3, canny_low=50, canny_high=150, fill_area_ratio=0.5, min_length=15, pen_size=2):
         if not self.FindCanvas():
             return
         self.SetPenSize(pen_size)
         self.SetPen()
         self.FindColorInput()
         self.SetColor((0,0,0)) #black
-        strokes = get_draw_strokes(img_path, self.maxWidth, self.maxHeight, epsilon_factor=epsilon_factor, mask_thresh=mask_thresh, min_length=min_length)
+        strokes = get_draw_strokes(img_path, canvas_width=self.maxWidth, canvas_height=self.maxHeight, epsilon_factor=epsilon_factor, canny_low=canny_low, canny_high=canny_high, fill_area_ratio=fill_area_ratio, min_length=min_length)
 
         if not strokes:
             print("No strokes to draw — check your image and threshold.")

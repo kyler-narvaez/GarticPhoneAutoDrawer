@@ -50,7 +50,6 @@ def save_contours_as_image(contours, width, height, path, thickness=1):
         cv2.polylines(canvas, [pts], isClosed=False, color=0, thickness=thickness)
     save_image(canvas, path)
 
-
 def convert_to_grayscale(img_arr):
     # convert to grayscale
     img_gray = img_arr.mean(axis=2).astype(np.float32) / 255.0
@@ -91,45 +90,74 @@ def get_contours(skeleton):
 
     return contours
 
-def simplify_contours(contours, epsilon_factor=0.01, min_length=15):
+def simplify_contours(contours, epsilon_factor=0.01, min_length=15, small_area_threshold=500, small_epsilon_factor=0.002):
     simplified_contours = []
-    for contour in contours:
-        length = cv2.arcLength(contour, closed=False)
+    for c in contours:
+        length = cv2.arcLength(c, closed=True)
         if length < min_length:
-            continue  # skip noise fragments
-        epsilon = epsilon_factor * cv2.arcLength(contour, closed=False)
-        simplified = cv2.approxPolyDP(contour, epsilon, closed=False)
-        simplified_contours.append(simplified.reshape(-1, 2))  # Reshape to (N, 2) for easier handling
+            continue
+        area = cv2.contourArea(c)
+        factor = small_epsilon_factor if area < small_area_threshold else epsilon_factor
+        epsilon = factor * length
+        simplified = cv2.approxPolyDP(c, epsilon, closed=True)
+        simplified_contours.append(simplified.reshape(-1, 2))
     return simplified_contours
 
 
-def get_draw_strokes(img_path, canvas_width, canvas_height, epsilon_factor=0.01, mask_thresh=0.5, min_length=15):
+def get_draw_strokes(img_path, canvas_width, canvas_height, epsilon_factor=0.01, canny_low=50, canny_high=150, fill_area_ratio=0.5, min_length=15):
     img = load_image(img_path)
+    if img is None:
+        return
 
-    if img is None: return
-    
-    _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(img.shape[0], img.shape[1], canvas_height, canvas_width)
+    _, new_width, new_height, x_offset, y_offset = find_scale_and_offsets(
+        img.shape[0], img.shape[1], canvas_height, canvas_width
+    )
     img_resized = resize_image(img, new_width, new_height)
 
     gray_img = convert_to_grayscale(img_resized)
+    gray_uint8 = (gray_img * 255).astype(np.uint8)
     save_image(gray_img, './gray.png')
-    mask = create_mask(gray_img, threshold=mask_thresh)
-    save_image(mask, './mask.png')
-    skeleton = skeletonize(mask)
-    save_image(skeleton, './skeleton.png')
 
-    contours = get_contours(skeleton=skeleton)
-    simplified_contours = simplify_contours(contours, epsilon_factor=epsilon_factor, min_length=min_length)
+    # replaces create_mask/threshold — edges instead of brightness, polarity-agnostic
+    edges = cv2.Canny(gray_uint8, canny_low, canny_high)
+    edges_closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    save_image(edges_closed, './edges.png')
+
+    contours, hierarchy = cv2.findContours(edges_closed, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
+    simplified_contours = []
+    for c in contours:
+        length = cv2.arcLength(c, closed=True)
+        if length < min_length:
+            continue
+
+        area = cv2.contourArea(c)
+        x, y, w, h = cv2.boundingRect(c)
+        fill_ratio = area / max(w * h, 1)
+
+        if fill_ratio > fill_area_ratio:
+            # filled region — use its outline directly, no skeletonize needed
+            epsilon = epsilon_factor * length
+            simplified = cv2.approxPolyDP(c, epsilon, closed=True)
+            simplified_contours.append(simplified.reshape(-1, 2))
+        else:
+            # thin/line-like — build a small mask of just this contour, skeletonize that alone
+            local_mask = np.zeros((new_height, new_width), dtype=np.uint8)
+            cv2.drawContours(local_mask, [c], -1, 255, thickness=cv2.FILLED)
+            local_skeleton = skeletonize(local_mask.astype(bool))
+
+            line_contours = get_contours(local_skeleton)  # your existing sknw-based function
+            line_simplified = simplify_contours(line_contours, epsilon_factor=epsilon_factor, min_length=min_length)
+            simplified_contours.extend(line_simplified)
+
     save_contours_as_image(simplified_contours, new_width, new_height, './simp_conts.png')
 
-    # Offset the contours to fit within the canvas
     offset_contours = []
     for contour in simplified_contours:
         offset_contour = [(x + x_offset, y + y_offset) for (x, y) in contour]
         offset_contours.append(offset_contour)
 
     return offset_contours
-
 if __name__ == "__main__":
     # Example usage
     points = get_draw_points("./images/test_img.png", 800, 600, threshold=0.5, step_count=12)
